@@ -1,0 +1,82 @@
+{
+  "apiVersion": "v1",
+  "kind": "Template",
+  "labels": {
+    "template": "ngc-framework-template"
+  },
+  "message": "The following NGC-ML-framework pod has been created: ${NGC_IMAGE}.\n\n",
+  "metadata": {
+    "annotations": {
+      "description": "Template for NGC-ML-frameworks. See https://ngc.nvidia.com/registry/",
+      "tags": "NVIDIA,machine-learning"
+    },
+    "name": "ngc-ml-framework"
+  },
+  "objects": [
+    {
+      "apiVersion": "v1",
+      "kind": "Pod",
+      "metadata": {
+	"name": "${NGC_POD_NAME}",
+	"namespace": "nvidia"
+      },
+      "spec": {
+	"restartPolicy": "OnFailure",
+	"containers": [
+	  {
+            "name": "ngc",
+            "image": "${NGC_IMAGE}",
+            "command": [
+              "/bin/bash",
+              "-c",
+              "trap : TERM INT; sleep infinity & wait"
+            ],
+            "env": null,
+            "volumeMounts": [
+              {
+		"mountPath": "/dev/shm",
+		"name": "dshm"
+              }
+            ],
+            "securityContext": {
+              "allowPrivilegeEscalation": false,
+              "capabilities": {
+		"drop": [
+		  "ALL"
+		]
+              },
+              "seLinuxOptions": {
+		"type": "nvidia_container_t"
+              }
+            }
+	  }
+	],
+	"volumes": [
+	  {
+            "name": "dshm",
+            "empytDir": {
+              "medium": "Memory"
+            }
+	  }
+	]
+      }
+    }
+  ],
+  "parameters": [
+    {
+      "description": "Which framework image to use: nvcr.io/nvidia/caffe:18.09-py3 ...",
+      "displayName": "NGC Framework Image",
+      "name": "NGC_IMAGE",
+      "value": "nvcr.io/nvidia/caffe:18.09-py3"
+    },
+    {
+      "description": "Choose the display name of the container image: caffe, caffe2, cntk, ...",
+      "displayName": "NGC Pod Name",
+      "name": "NGC_POD_NAME",
+      "value": "caffe-18.09-py2"
+    }
+  ]
+
+
+
+}

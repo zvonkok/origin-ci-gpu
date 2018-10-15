@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: caffe
+  namespace: nvidia 
+spec:
+  restartPolicy: OnFailure
+  containers:
+    - resources:
+      ulimits:
+        soft: -1
+        hard: -1
+    - name: caffe
+      image: "nvcr.io/nvidia/caffe2:18.08-py3"
+      command: [ "/bin/bash", "-c", "trap : TERM INT; sleep infinity & wait" ]
+      env:
+      volumeMounts:
+        - mountPath: "/dev/shm"
+          name: dshm
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: ["ALL"]
+        seLinuxOptions:
+          type: nvidia_container_t
+
+  volumes:
+    - name: dshm
+      empytDir: 
+        medium: Memory
