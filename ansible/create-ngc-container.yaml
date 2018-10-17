@@ -1,0 +1,5 @@
+---
+- hosts: localhost
+
+  tasks:
+  - name: "Create container for each NGC image"

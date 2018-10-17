@@ -2,22 +2,54 @@
   "apiVersion": "v1",
   "kind": "Template",
   "labels": {
-    "template": "ngc-framework-template"
+    "template": "ngc-digits-template"
   },
-  "message": "The following NGC-ML-framework pod has been created: ${NGC_IMAGE}.\n\n",
+  "message": "The following NGC-digits pod has been created: ${NGC_IMAGE}.\n\n",
   "metadata": {
     "annotations": {
-      "description": "Template for NGC-ML-frameworks. See https://ngc.nvidia.com/registry/",
+      "description": "Template for NGC-digits",
+      "iconClass": "icon-shadowman",
+      "openshift.io/display-name": "NGC",
+      "openshift.io/documentation-url": "https://ngc.nvidia.com/registry",
       "tags": "NVIDIA,machine-learning"
     },
-    "name": "ngc-ml-framework"
+    "name": "ngc-digits"
   },
   "objects": [
     {
       "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "template.openshift.io/expose-uri": "digits://{.spec.clusterIP}:{.spec.ports[?(.name==\"digits\")].port}"
+        },
+        "name": "digits"
+      },
+      "spec": {
+        "ports": [
+          {
+            "name": "digits",
+            "nodePort": 0,
+            "port": 8888,
+            "protocol": "TCP",
+            "targetPort": 5000
+          }
+        ],
+        "selector": {
+          "name": "digits"
+              },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
       "kind": "Pod",
       "metadata": {
-	"name": "${NGC_POD_NAME}",
+	"name": "digits-18-09",
 	"namespace": "nvidia"
       },
       "spec": {
@@ -25,13 +57,15 @@
 	"containers": [
 	  {
             "name": "ngc",
-            "image": "${NGC_IMAGE}",
-            "command": [
-              "/bin/bash",
-              "-c",
-              "trap : TERM INT; sleep infinity & wait"
-            ],
+            "image": "nvcr.io/nvidia/digits:18.09",
             "env": null,
+	    "ports": [
+	      {
+		"hostPort": 8888,
+		"containerPort": 5000,
+		"protocol": "TCP"
+	      }
+	    ],
             "volumeMounts": [
               {
 		"mountPath": "/dev/shm",

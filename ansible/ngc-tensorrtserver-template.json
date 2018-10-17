@@ -1,0 +1,138 @@
+{
+  "apiVersion": "v1",
+  "kind": "Template",
+  "labels": {
+    "template": "ngc-tensorrtserver-template"
+  },
+  "message": "The following NGC-TensorRT Inference Server pod has been created: ${NGC_IMAGE}.\n\n",
+  "metadata": {
+    "annotations": {
+      "description": "Template for NGC-TensorRT Inference Server",
+      "iconClass": "icon-shadowman",
+      "openshift.io/display-name": "NGC",
+      "openshift.io/documentation-url": "https://ngc.nvidia.com/registry",
+      "tags": "NVIDIA,machine-learning"
+    },
+    "name": "ngc-tensorrtserver"
+  },
+  "objects": [
+    {
+      "kind": "Service",
+      "apiVersion": "v1",
+      "metadata": {
+	"name": "tensorrtserver-service"
+      },
+      "spec": {
+	"selector": {
+	  "app": "tensorrtserver"
+	},
+	"ports": [
+	  {
+            "name": "http",
+            "protocol": "TCP",
+            "port": 8000,
+            "targetPort": 8000
+	  },
+	  {
+            "name": "grpc",
+            "port": 8001,
+            "targetPort": 8001
+	  },
+	  {
+            "name": "prometheus",
+            "port": 8002,
+            "targetPort": 8002
+	  }
+	],
+	"sessionAffinity": "None",
+        "type": "ClusterIP"
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Pod",
+      "metadata": {
+	"name": "tensorrtserver-18-09-py3",
+	"labels": {
+	  "app": "tensorrtserver"
+	}
+      },
+      "spec": {
+	"restartPolicy": "OnFailure",
+	"containers": [
+	  {
+	    "capabilities": {},
+            "name": "ngc",
+            "image": "nvcr.io/nvidia/tensorrtserver:18.09-py3",
+	    "command": ["/bin/bash"],
+	    "args": ["-c", "/opt/tensorrtserver/bin/trtserver --model-store=/dgx/tensorrtserver/examples/models"],
+            "env": null,
+	    "ports": [
+	      {
+		"containerPort": 8000,
+		"name": "http"
+	      },
+	      {
+		"containerPort": 8001,
+		"name": "grpc"
+	      },
+	      {
+		"containerPort": 8002,
+		"name": "prometheus"
+	      }
+	    ],
+            "volumeMounts": [
+              {
+		"mountPath": "/dev/shm",
+		"name": "dshm"
+              },
+	      {
+		"mountPath": "/dgx",
+		"name": "dgx"
+	      }
+            ],
+            "securityContext": {
+              "allowPrivilegeEscalation": false,
+              "capabilities": { },
+	      "privileged": false,
+              "seLinuxOptions": {
+		"type": "nvidia_container_t"
+              }
+            }
+	  }
+	],
+	"volumes": [
+	  {
+            "name": "dshm",
+            "empytDir": {
+              "medium": "Memory"
+            }
+	  },
+	  {
+	    "name": "dgx",
+	    "hostPath": {
+	      "path": "/dgx"
+	    }
+	  }
+	]
+      }
+    }
+  ],
+  "parameters": [
+    {
+      "description": "Which framework image to use: nvcr.io/nvidia/caffe:18.09-py3 ...",
+      "displayName": "NGC Framework Image",
+      "name": "NGC_IMAGE",
+      "value": "nvcr.io/nvidia/caffe:18.09-py3"
+    },
+    {
+      "description": "Choose the display name of the container image: caffe, caffe2, cntk, ...",
+      "displayName": "NGC Pod Name",
+      "name": "NGC_POD_NAME",
+      "value": "caffe-18.09-py2"
+    }
+  ]
+
+
+
+}

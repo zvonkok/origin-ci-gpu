@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: inference-server-clients
+  namespace: nvidia 
+spec:
+  restartPolicy: OnFailure
+  containers:
+    - name: inference-server-clients
+      image: "quay.io/zvonkok/inference_server_clients"
+      command: [ "/bin/bash", "-c", "trap : TERM INT; sleep infinity & wait" ] 
