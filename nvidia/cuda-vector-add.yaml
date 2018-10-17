@@ -16,7 +16,11 @@ spec:
         - name: NVIDIA_REQUIRE_CUDA  
           value: "cuda>=5.0"
       securityContext:
-        privileged: true
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: ["ALL"]
+        seLinuxOptions:
+          type: nvidia_container_t
 
       resources:
         limits:

@@ -26,6 +26,10 @@ allow nvidia_container_t xserver_exec_t:file { entrypoint execute getattr open r
 dev_rw_xserver_misc(nvidia_container_t)
 
 
+
+allow nvidia_container_t container_file_t:dir search;
+
+
 #allow nvidia_container_t xen_port_t:tcp_socket name_bind;
 #allow nvidia_container_t node_t:tcp_socket node_bind;
 #allow nvidia_container_t self:tcp_socket listen;
@@ -35,7 +39,6 @@ dev_rw_xserver_misc(nvidia_container_t)
 
 
 # --- device-plugin specific ---- maybe make it a sub policy of nvidia_container_t 
-allow nvidia_container_t container_file_t:sock_file create;
-allow nvidia_container_t container_file_t:sock_file { getattr unlink write };
+allow nvidia_container_t container_file_t:sock_file { create getattr unlink write };
 
 
