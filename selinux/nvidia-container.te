@@ -6,6 +6,11 @@ gen_require(`
         type container_runtime_tmpfs_t;
         type xserver_exec_t;
         type container_file_t;
+        type xen_port_t;
+        type node_t;
+        type soundd_port_t;
+        type unreserved_port_t;
+        type ephemeral_port_t;
 ')
 
 container_domain_template(nvidia_container)
@@ -27,15 +32,21 @@ dev_rw_xserver_misc(nvidia_container_t)
 
 
 
+# NEW check
 allow nvidia_container_t container_file_t:dir search;
 
+# --- allow running
 
-#allow nvidia_container_t xen_port_t:tcp_socket name_bind;
-#allow nvidia_container_t node_t:tcp_socket node_bind;
-#allow nvidia_container_t self:tcp_socket listen;
-#allow nvidia_container_t soundd_port_t:tcp_socket name_bind;
-#allow nvidia_container_t unreserved_port_t:tcp_socket name_bind;
-#allow nvidia_container_t self:tcp_socket accept;
+
+
+allow nvidia_container_t ephemeral_port_t:tcp_socket name_connect;
+
+allow nvidia_container_t xen_port_t:tcp_socket name_bind;
+allow nvidia_container_t node_t:tcp_socket node_bind;
+allow nvidia_container_t self:tcp_socket listen;
+allow nvidia_container_t soundd_port_t:tcp_socket name_bind;
+allow nvidia_container_t unreserved_port_t:tcp_socket name_bind;
+allow nvidia_container_t self:tcp_socket accept;
 
 
 # --- device-plugin specific ---- maybe make it a sub policy of nvidia_container_t 
