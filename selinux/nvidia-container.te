@@ -52,4 +52,6 @@ allow nvidia_container_t self:tcp_socket accept;
 # --- device-plugin specific ---- maybe make it a sub policy of nvidia_container_t 
 allow nvidia_container_t container_file_t:sock_file { create getattr unlink write };
 
+allow nvidia_container_t container_file_t:file entrypoint;
+allow nvidia_container_t soundd_port_t:tcp_socket name_connect;
 

@@ -9,7 +9,7 @@
         "annotations": {
             "description": "Template for NGC-ML-frameworks",
             "iconClass": "icon-shadowman",
-            "openshift.io/display-name": "NGC",
+            "openshift.io/display-name": "NGC Machine Learning Framework",
             "openshift.io/documentation-url": "https://ngc.nvidia.com/registry",
             "tags": "NVIDIA,machine-learning"
         },
@@ -52,6 +52,11 @@
                             "seLinuxOptions": {
 		                "type": "nvidia_container_t"
                             }
+                        },
+                        "resources": {
+                            "limits": {
+                                "nvidia.com/gpu": "${NUM_GPUS}"
+                            }
                         }
 	            }
 	        ],
@@ -91,6 +96,12 @@
             "name": "NGC_DATA",
             "value": "/ngc"
 	    
+        },
+        {
+            "description": "How many GPUs to use",
+            "displayName": "Number of GPUs",
+            "name": "NUM_GPUS",
+            "value": "1"
         }
     ]
 

@@ -4,12 +4,12 @@
   "labels": {
     "template": "ngc-digits-template"
   },
-  "message": "The following NGC-digits pod has been created: ${NGC_IMAGE}.\n\n",
+  "message": "The following NGC-digits Server pod has been created: ${NGC_IMAGE}.\n\n",
   "metadata": {
     "annotations": {
-      "description": "Template for NGC-digits",
+      "description": "Template for NGC-digits Server",
       "iconClass": "icon-shadowman",
-      "openshift.io/display-name": "NGC",
+      "openshift.io/display-name": "NGC DIGITS",
       "openshift.io/documentation-url": "https://ngc.nvidia.com/registry",
       "tags": "NVIDIA,machine-learning"
     },
@@ -17,32 +17,25 @@
   },
   "objects": [
     {
-      "apiVersion": "v1",
       "kind": "Service",
+      "apiVersion": "v1",
       "metadata": {
-        "annotations": {
-          "template.openshift.io/expose-uri": "digits://{.spec.clusterIP}:{.spec.ports[?(.name==\"digits\")].port}"
-        },
-        "name": "digits"
+	"name": "digits-service"
       },
       "spec": {
-        "ports": [
-          {
-            "name": "digits",
-            "nodePort": 0,
-            "port": 8888,
+	"selector": {
+	  "app": "digits"
+	},
+	"ports": [
+	  {
+            "name": "http",
             "protocol": "TCP",
+            "port": 5000, 
             "targetPort": 5000
-          }
-        ],
-        "selector": {
-          "name": "digits"
-              },
-        "sessionAffinity": "None",
+	  }
+	],
+	"sessionAffinity": "None",
         "type": "ClusterIP"
-      },
-      "status": {
-        "loadBalancer": {}
       }
     },
     {
@@ -50,40 +43,48 @@
       "kind": "Pod",
       "metadata": {
 	"name": "digits-18-09",
-	"namespace": "nvidia"
+	"labels": {
+	  "app": "digits"
+	}
       },
       "spec": {
 	"restartPolicy": "OnFailure",
 	"containers": [
 	  {
+	    "capabilities": {},
             "name": "ngc",
             "image": "nvcr.io/nvidia/digits:18.09",
             "env": null,
 	    "ports": [
 	      {
-		"hostPort": 8888,
 		"containerPort": 5000,
-		"protocol": "TCP"
+		"name": "http"
 	      }
 	    ],
             "volumeMounts": [
               {
 		"mountPath": "/dev/shm",
 		"name": "dshm"
-              }
+              },
+	      {
+		"mountPath": "/ngc",
+		"name": "ngc"
+	      }
             ],
             "securityContext": {
               "allowPrivilegeEscalation": false,
-              "capabilities": {
-		"drop": [
-		  "ALL"
-		]
-              },
+              "capabilities": { },
+	      "privileged": false,
               "seLinuxOptions": {
 		"type": "nvidia_container_t"
               }
+            },
+            "resources": {
+                "limits": {
+                    "nvidia.com/gpu": "${NUM_GPUS}"
+                }
             }
-	  }
+          }
 	],
 	"volumes": [
 	  {
@@ -91,26 +92,29 @@
             "empytDir": {
               "medium": "Memory"
             }
+	  },
+	  {
+	    "name": "ngc",
+	    "hostPath": {
+	      "path": "/data/zvonkok/ngc"
+	    }
 	  }
 	]
       }
     }
   ],
   "parameters": [
-    {
-      "description": "Which framework image to use: nvcr.io/nvidia/caffe:18.09-py3 ...",
-      "displayName": "NGC Framework Image",
-      "name": "NGC_IMAGE",
-      "value": "nvcr.io/nvidia/caffe:18.09-py3"
-    },
-    {
-      "description": "Choose the display name of the container image: caffe, caffe2, cntk, ...",
-      "displayName": "NGC Pod Name",
-      "name": "NGC_POD_NAME",
-      "value": "caffe-18.09-py2"
+      {
+          "description": "Volume of Model Store",
+          "displayName": "Volume of Model Store",
+          "name": "MODEL_STORE",
+          "value": "/ngc"
+      },
+      {
+      "description": "How many GPUs to use",
+      "displayName": "Number of GPUs",
+      "name": "NUM_GPUS",
+      "value": "1"
     }
   ]
-
-
-
 }

@@ -9,7 +9,7 @@
     "annotations": {
       "description": "Template for NGC-TensorRT Inference Server",
       "iconClass": "icon-shadowman",
-      "openshift.io/display-name": "NGC",
+      "openshift.io/display-name": "NGC TensorRT Inference Server",
       "openshift.io/documentation-url": "https://ngc.nvidia.com/registry",
       "tags": "NVIDIA,machine-learning"
     },
@@ -98,8 +98,13 @@
               "seLinuxOptions": {
 		"type": "nvidia_container_t"
               }
+            },
+            "resources": {
+                "limits": {
+                    "nvidia.com/gpu": "${NUM_GPUS}"
+                }
             }
-	  }
+          }
 	],
 	"volumes": [
 	  {
@@ -119,20 +124,17 @@
     }
   ],
   "parameters": [
-    {
-      "description": "Which framework image to use: nvcr.io/nvidia/caffe:18.09-py3 ...",
-      "displayName": "NGC Framework Image",
-      "name": "NGC_IMAGE",
-      "value": "nvcr.io/nvidia/caffe:18.09-py3"
-    },
-    {
-      "description": "Choose the display name of the container image: caffe, caffe2, cntk, ...",
-      "displayName": "NGC Pod Name",
-      "name": "NGC_POD_NAME",
-      "value": "caffe-18.09-py2"
+      {
+          "description": "Volume of Model Store",
+          "displayName": "Volume of Model Store",
+          "name": "MODEL_STORE",
+          "value": "/ngc"
+      },
+      {
+      "description": "How many GPUs to use",
+      "displayName": "Number of GPUs",
+      "name": "NUM_GPUS",
+      "value": "1"
     }
   ]
-
-
-
 }

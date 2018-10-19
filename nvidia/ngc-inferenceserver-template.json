@@ -4,12 +4,12 @@
   "labels": {
     "template": "ngc-inferenceserver-template"
   },
-  "message": "The following NGC-Inference Server pod has been created: ${NGC_IMAGE}.\n\n",
+  "message": "The following NGC-TensorRT Inference Server pod has been created: ${NGC_IMAGE}.\n\n",
   "metadata": {
     "annotations": {
       "description": "Template for NGC-Inference Server",
       "iconClass": "icon-shadowman",
-      "openshift.io/display-name": "NGC",
+      "openshift.io/display-name": "NGC Inference Server",
       "openshift.io/documentation-url": "https://ngc.nvidia.com/registry",
       "tags": "NVIDIA,machine-learning"
     },
@@ -52,7 +52,7 @@
       "apiVersion": "v1",
       "kind": "Pod",
       "metadata": {
-	"name": "inferenceserver-18-08-1-py2",
+	"name": "inferenceserver-18-09-py3",
 	"labels": {
 	  "app": "inferenceserver"
 	}
@@ -63,7 +63,7 @@
 	  {
 	    "capabilities": {},
             "name": "ngc",
-            "image": "nvcr.io/nvidia/inferenceserver:18.08.1-py2",
+            "image": "nvcr.io/nvidia/inferenceserver:18.09-py3",
 	    "command": ["/bin/bash"],
 	    "args": ["-c", "/opt/inference_server/bin/inference_server --model-store=/ngc/tensorrtserver/examples/models"],
             "env": null,
@@ -98,8 +98,13 @@
               "seLinuxOptions": {
 		"type": "nvidia_container_t"
               }
+            },
+            "resources": {
+                "limits": {
+                    "nvidia.com/gpu": "${NUM_GPUS}"
+                }
             }
-	  }
+          }
 	],
 	"volumes": [
 	  {
@@ -120,19 +125,16 @@
   ],
   "parameters": [
     {
-      "description": "Which framework image to use: nvcr.io/nvidia/caffe:18.09-py3 ...",
-      "displayName": "NGC Framework Image",
-      "name": "NGC_IMAGE",
-      "value": "nvcr.io/nvidia/caffe:18.09-py3"
+      "description": "Volume of Model Store",
+      "displayName": "Volume of Model Store",
+      "name": "MODEL_STORE",
+      "value": "/ngc"
     },
     {
-      "description": "Choose the display name of the container image: caffe, caffe2, cntk, ...",
-      "displayName": "NGC Pod Name",
-      "name": "NGC_POD_NAME",
-      "value": "caffe-18.09-py2"
+      "description": "How many GPUs to use",
+      "displayName": "Number of GPUs",
+      "name": "NUM_GPUS",
+      "value": "1"
     }
   ]
-
-
-
 }
