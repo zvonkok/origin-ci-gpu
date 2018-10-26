@@ -5,53 +5,35 @@ policy_module(nvidia-container, 0.1)
 gen_require(`
         type container_runtime_tmpfs_t;
         type xserver_exec_t;
-        type container_file_t;
-        type xen_port_t;
-        type node_t;
-        type soundd_port_t;
-        type unreserved_port_t;
-        type ephemeral_port_t;
+	type xserver_misc_device_t; 
+
+	attribute sandbox_net_domain;
+	attribute sandbox_caps_domain;
+	attribute svirt_sandbox_domain;
+	attribute kernel_system_state_reader;
+	attribute container_net_domain;
+	attribute syslog_client_type;
 ')
 
 container_domain_template(nvidia_container)
 
-# --- hanging forever without this
-allow nvidia_container_t container_runtime_t:process sigchld;
+typeattribute nvidia_container_t sandbox_net_domain;
+typeattribute nvidia_container_t sandbox_caps_domain;
+typeattribute nvidia_container_t svirt_sandbox_domain;
+typeattribute nvidia_container_t kernel_system_state_reader;
+typeattribute nvidia_container_t container_net_domain;
+typeattribute nvidia_container_t syslog_client_type;
 
 # --- podman/docker
-getattr_dirs_pattern(nvidia_container_t, container_runtime_tmpfs_t, container_runtime_tmpfs_t)
-list_dirs_pattern(nvidia_container_t, container_runtime_tmpfs_t, container_runtime_tmpfs_t)
-read_files_pattern(nvidia_container_t, container_runtime_tmpfs_t, container_runtime_tmpfs_t)
+#getattr_dirs_pattern(nvidia_container_t, container_runtime_tmpfs_t, container_runtime_tmpfs_t)
+#list_dirs_pattern(nvidia_container_t, container_runtime_tmpfs_t, container_runtime_tmpfs_t)
+#read_files_pattern(nvidia_container_t, container_runtime_tmpfs_t, container_runtime_tmpfs_t)
 
 # --- running nvidia-smi
 allow nvidia_container_t xserver_exec_t:file { entrypoint execute getattr open read execute_no_trans };
-
-# --- allow nvidia_container_t xserver_misc_device_t:chr_file { getattr ioctl open read write };
 # --- alloc mem, ... /dev/nvidia*
-dev_rw_xserver_misc(nvidia_container_t)
+allow nvidia_container_t xserver_misc_device_t:chr_file { getattr ioctl open read write };
 
+####dev_rw_xserver_misc(nvidia_container_t)
 
-
-# NEW check
-allow nvidia_container_t container_file_t:dir search;
-
-# --- allow running
-
-
-
-allow nvidia_container_t ephemeral_port_t:tcp_socket name_connect;
-
-allow nvidia_container_t xen_port_t:tcp_socket name_bind;
-allow nvidia_container_t node_t:tcp_socket node_bind;
-allow nvidia_container_t self:tcp_socket listen;
-allow nvidia_container_t soundd_port_t:tcp_socket name_bind;
-allow nvidia_container_t unreserved_port_t:tcp_socket name_bind;
-allow nvidia_container_t self:tcp_socket accept;
-
-
-# --- device-plugin specific ---- maybe make it a sub policy of nvidia_container_t 
-allow nvidia_container_t container_file_t:sock_file { create getattr unlink write };
-
-allow nvidia_container_t container_file_t:file entrypoint;
-allow nvidia_container_t soundd_port_t:tcp_socket name_connect;
 
