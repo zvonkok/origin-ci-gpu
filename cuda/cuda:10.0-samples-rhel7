@@ -1,0 +1,15 @@
+#!/bin/bash -x
+
+NC=$(buildah from quay.io/zvonkok/cuda:10.0-devel-rhel7)
+
+RUN="buildah run --user 0 $NC --"
+
+$RUN yum install -y \
+        cuda-nvcc-10-0 \
+        cuda-cudart-dev-10-0-${_CUDA_PKG_VERSION}-1 \
+        cuda-cublas-dev-10-0-${_CUDA_PKG_VERSION}-1 \
+        cuda-samples-10-0 \
+        make
+
+buildah commit $NC quay.io/zvonkok/cuda:10.0-samples-rhel7
+

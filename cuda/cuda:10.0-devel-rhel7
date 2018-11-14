@@ -1,0 +1,16 @@
+#!/bin/bash -x
+
+_CUDA_VERSION=10.0.130
+_CUDA_PKG_VERSION=10-0-${_CUDA_VERSION}-1
+
+NC=$(buildah from quay.io/zvonkok/cuda:10.0-runtime-rhel7)
+
+$RUN yum install -y \
+        cuda-libraries-dev-${_CUDA_PKG_VERSION} \
+        cuda-nvml-dev-${_CUDA_PKG_VERSION} \
+        cuda-minimal-build-${_CUDA_PKG_VERSION} \
+        cuda-command-line-tools-${_CUDA_PKG_VERSION}
+        yum clean all
+
+buildah commit $NC quay.io/zvonkok/cuda:10.0-devel-rhel7
+

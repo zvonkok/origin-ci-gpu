@@ -1,0 +1,41 @@
+#!/bin/bash -x
+
+BC="buildah config"
+
+NC=$(buildah from rhel7)
+
+RUN="buildah run --user 0 $NC --"
+COPY="buildah copy $NC"
+
+
+_CUDA_VERSION=10.0.130
+_CUDA_PKG_VERSION=10-0-${_CUDA_VERSION}-1
+_CUDA_REPO_RPM=https://developer.download.nvidia.com/compute/cuda/repos/rhel7/x86_64/cuda-repo-rhel7-${_CUDA_VERSION}-1.x86_64.rpm
+
+ENV="buildah config --env"
+
+$ENV CUDA_VERSION=${_CUDA_VERSION} $NC
+$ENV CUDA_PKG_VERSION=${_CUDA_PKG_VERSION} $NC
+
+$COPY /etc/yum.repos.d/* /etc/yum.repos.d/.
+$COPY /var/lib/yum/client-*.pem /var/lib/yum/.
+
+$RUN yum install -y ${_CUDA_REPO_RPM}
+
+$RUN yum install -y \
+        cuda-cudart-${_CUDA_PKG_VERSION} \
+        cuda-compat-10-0-410.48
+
+$RUN bash -c "ln -sf /usr/local/cuda-10.0 /usr/local/cuda"
+$RUN yum clean all
+
+$BC --created-by "Zvonko Kosic" $NC
+$BC --author "Zvonko Kosic"
+
+$ENV PATH=/usr/local/cuda/bin:${PATH} $NC
+
+$ENV NVIDIA_VISIBLE_DEVICES=all $NC
+$ENV NVIDIA_DRIVER_CAPABILITIES=compute,utility $NC
+$ENV NVIDIA_REQUIRE_CUDA="cuda>=10.0 brand=tesla,driver>=384,driver<385" $NC
+
+buildah commit $NC quay.io/zvonkok/cuda:10.0-base-rhel7
