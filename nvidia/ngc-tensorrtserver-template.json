@@ -116,7 +116,7 @@
 	  {
 	    "name": "ngc",
 	    "hostPath": {
-	      "path": "/data/zvonkok/ngc"
+	      "path": "/ngc"
 	    }
 	  }
 	]
