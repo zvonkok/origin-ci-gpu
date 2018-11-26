@@ -11,5 +11,7 @@ $RUN yum install -y \
         cuda-samples-10-0 \
         make
 
+$RUN bash -c "cd /usr/local/cuda/samples && make"
+
 buildah commit $NC quay.io/zvonkok/cuda:10.0-samples-rhel7
 

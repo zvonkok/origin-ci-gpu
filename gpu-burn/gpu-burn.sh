@@ -11,6 +11,9 @@ RUN="buildah run --user 0 $NC --"
 
 $RUN yum -y install git && yum clean all
 $RUN git clone https://github.com/zvonkok/gpu-burn.git /root/gpu-burn
+
+nvidia-container-cli --load-kmods configure --no-cgroups --utility --device 0 $NCM
+
 $RUN bash -c "cd /root/gpu-burn && make"
 
 cp $NCM/root/gpu-burn/gpu_burn $RHM/usr/local/bin/.
