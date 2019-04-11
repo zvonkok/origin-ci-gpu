@@ -24,6 +24,13 @@
 	        "namespace": "nvidia"
             },
             "spec": {
+                "tolerations": [
+   		 {
+      		     "key": "nvidia.com/gpu",
+                     "operator": "Exists",
+                     "effect": "NoSchedule"
+                 }
+                ],
 	        "restartPolicy": "OnFailure",
 	        "containers": [
 	            {
@@ -42,17 +49,6 @@
                                 "name": "ngc"
                             }
                         ],
-                        "securityContext": {
-                            "allowPrivilegeEscalation": false,
-                            "capabilities": {
-		                "drop": [
-		                    "ALL"
-		                ]
-                            },
-                            "seLinuxOptions": {
-		                "type": "nvidia_container_t"
-                            }
-                        },
                         "resources": {
                             "limits": {
                                 "nvidia.com/gpu": "${NUM_GPUS}"
