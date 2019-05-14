@@ -158,3 +158,11 @@ case $STEP in
         msg "Done"
         
 esac
+
+
+#"args": ["-c", "cd /rapids/notebooks/ && utils/start-jupyter.sh"],
+
+#	    "command": ["/bin/bash", "-c", "--"],bash utils/start-jupyter.sh#
+#	    "args": [ "while true; do sleep 30; done;" ],
+
+#"command": ["/bin/bash", "utils/start-jupyter.sh"],

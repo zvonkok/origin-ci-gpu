@@ -1,140 +1,140 @@
-{
-  "apiVersion": "v1",
-  "kind": "Template",
-  "labels": {
-    "template": "ngc-tensorrtserver-template"
-  },
-  "message": "The following NGC-TensorRT Inference Server pod has been created: ${NGC_IMAGE}.\n\n",
-  "metadata": {
-    "annotations": {
-      "description": "Template for NGC-TensorRT Inference Server",
-      "iconClass": "icon-shadowman",
-      "openshift.io/display-name": "NGC TensorRT Inference Server",
-      "openshift.io/documentation-url": "https://ngc.nvidia.com/registry",
-      "tags": "NVIDIA,machine-learning"
+  {
+    "apiVersion": "v1",
+    "kind": "Template",
+    "labels": {
+      "template": "ngc-rapids-template"
     },
-    "name": "ngc-tensorrtserver"
-  },
-  "objects": [
-    {
-      "kind": "Service",
-      "apiVersion": "v1",
-      "metadata": {
-	"name": "tensorrtserver-service"
+    "message": "The following NGC-RAPIDS  pod has been created: ${NGC_IMAGE}.\n\n",
+    "metadata": {
+      "annotations": {
+        "description": "Template for NGC-RAPIDS",
+        "iconClass": "icon-shadowman",
+        "openshift.io/display-name": "NGC RAPIDS",
+        "openshift.io/documentation-url": "https://ngc.nvidia.com/registry",
+        "tags": "NVIDIA,machine-learning"
       },
-      "spec": {
-	"selector": {
-	  "app": "tensorrtserver"
-	},
-	"ports": [
-	  {
-            "name": "http",
-            "protocol": "TCP",
-            "port": 8000,
-            "targetPort": 8000
-	  },
-	  {
-            "name": "grpc",
-            "port": 8001,
-            "targetPort": 8001
-	  },
-	  {
-            "name": "prometheus",
-            "port": 8002,
-            "targetPort": 8002
-	  }
-	],
-	"sessionAffinity": "None",
-        "type": "ClusterIP"
+      "name": "ngc-rapids"
+    },
+    "objects": [
+      {
+        "kind": "Service",
+        "apiVersion": "v1",
+        "metadata": {
+    "name": "rapids-service"
+        },
+        "spec": {
+    "selector": {
+      "app": "rapids"
+    },
+    "ports": [
+      {
+              "name": "http",
+              "protocol": "TCP",
+              "port": 8888,
+              "targetPort": 8888
+      },
+      {
+              "name": "grpc",
+              "port": 8787,
+              "targetPort": 8787
+      },
+      {
+              "name": "prometheus",
+              "port": 8786,
+              "targetPort": 8786
       }
-    },
-    {
-      "apiVersion": "v1",
-      "kind": "Pod",
-      "metadata": {
-	"name": "tensorrtserver-18-09-py3",
-	"labels": {
-	  "app": "tensorrtserver"
-	}
+    ],
+    "sessionAffinity": "None",
+          "type": "ClusterIP"
+        }
       },
-      "spec": {
-	"restartPolicy": "OnFailure",
-	"containers": [
-	  {
-	    "capabilities": {},
-            "name": "ngc",
-            "image": "nvcr.io/nvidia/tensorrtserver:18.09-py3",
-	    "command": ["/bin/bash"],
-	    "args": ["-c", "/opt/tensorrtserver/bin/trtserver --model-store=/ngc/tensorrtserver/examples/models"],
-            "env": null,
-	    "ports": [
-	      {
-		"containerPort": 8000,
-		"name": "http"
-	      },
-	      {
-		"containerPort": 8001,
-		"name": "grpc"
-	      },
-	      {
-		"containerPort": 8002,
-		"name": "prometheus"
-	      }
-	    ],
-            "volumeMounts": [
-              {
-		"mountPath": "/dev/shm",
-		"name": "dshm"
-              },
-	      {
-		"mountPath": "/ngc",
-		"name": "ngc"
-	      }
-            ],
-            "securityContext": {
-              "allowPrivilegeEscalation": false,
-              "capabilities": { },
-	      "privileged": false,
-              "seLinuxOptions": {
-		"type": "nvidia_container_t"
-              }
-            },
-            "resources": {
-                "limits": {
-                    "nvidia.com/gpu": "${NUM_GPUS}"
-                }
-            }
+      {
+        "apiVersion": "v1",
+        "kind": "Pod",
+        "metadata": {
+    "name": "rapids",
+    "labels": {
+      "app": "rapids"
+    }
+        },
+        "spec": {
+    "restartPolicy": "OnFailure",
+    "containers": [
+      {
+        "capabilities": {},
+              "name": "rapids",
+              "image": "rapidsai/rapidsai:latest",
+        "command": ["/rapids/notebooks/utils/start-jupyter.sh"],
+        "args": [""],
+              "env": null,
+        "ports": [
+          {
+      "containerPort": 8888,
+      "name": "http"
+          },
+          {
+      "containerPort": 8787,
+      "name": "grpc"
+          },
+          {
+      "containerPort": 8002,
+      "name": "prometheus"
           }
-	],
-	"volumes": [
-	  {
-            "name": "dshm",
-            "empytDir": {
-              "medium": "Memory"
+        ],
+              "volumeMounts": [
+                {
+      "mountPath": "/dev/shm",
+      "name": "dshm"
+                },
+          {
+      "mountPath": "/ngc",
+      "name": "ngc"
+          }
+              ],
+              "securityContext": {
+                "allowPrivilegeEscalation": false,
+                "capabilities": { },
+          "privileged": false,
+                "seLinuxOptions": {
+      "type": "nvidia_container_t"
+                }
+              },
+              "resources": {
+                  "limits": {
+                      "nvidia.com/gpu": "${NUM_GPUS}"
+                  }
+              }
             }
-	  },
-	  {
-	    "name": "ngc",
-	    "hostPath": {
-	      "path": "/ngc"
-	    }
-	  }
-	]
-      }
-    }
-  ],
-  "parameters": [
+    ],
+    "volumes": [
       {
-          "description": "Volume of Model Store",
-          "displayName": "Volume of Model Store",
-          "name": "MODEL_STORE",
-          "value": "/ngc"
+              "name": "dshm",
+              "empytDir": {
+                "medium": "Memory"
+              }
       },
       {
-      "description": "How many GPUs to use",
-      "displayName": "Number of GPUs",
-      "name": "NUM_GPUS",
-      "value": "1"
-    }
-  ]
-}
+        "name": "ngc",
+        "hostPath": {
+          "path": "/ngc"
+        }
+      }
+    ]
+        }
+      }
+    ],
+    "parameters": [
+        {
+            "description": "Volume of Model Store",
+            "displayName": "Volume of Model Store",
+            "name": "MODEL_STORE",
+            "value": "/ngc"
+        },
+        {
+        "description": "How many GPUs to use",
+        "displayName": "Number of GPUs",
+        "name": "NUM_GPUS",
+        "value": "1"
+      }
+    ]
+  }

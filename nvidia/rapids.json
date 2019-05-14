@@ -1,0 +1,45 @@
+{
+	"apiVersion": "v1",
+"kind": "Pod",
+"metadata": {
+  "name": "rapids",
+  "labels": {
+    "app": "rapids"
+  }
+},
+"spec": {
+  "restartPolicy": "OnFailure",
+  "containers": [
+    {
+      "capabilities": {},
+      "name": "rapids",
+      "image": "rapidsai/rapidsai:latest",
+      "command": ["/bin/bash", "-l", "-c"],
+      "args": [ "/rapids/notebooks/utils/start-jupyter.sh" ],
+      "env": null,
+      "ports": [
+	{
+	  "containerPort": 8888,
+	  "name": "http"
+	},
+	{
+	  "containerPort": 8787,
+	  "name": "grpc"
+	},
+	{
+	  "containerPort": 8786,
+	  "name": "prometheus"
+	}
+      ],
+      "securityContext": {                            
+	    "privileged": true
+      },
+      "resources": {
+	  "limits": {
+	      "nvidia.com/gpu": "1"
+	  }
+      }
+    }
+  ]
+}
+}

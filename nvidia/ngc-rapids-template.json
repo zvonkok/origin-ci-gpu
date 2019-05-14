@@ -1,0 +1,124 @@
+{
+  "apiVersion": "v1",
+  "kind": "Template",
+  "labels": {
+    "template": "ngc-rapids-template"
+  },
+  "message": "The following NGC-RAPIDS  pod has been created: ${NGC_IMAGE}.\n\n",
+  "metadata": {
+    "annotations": {
+      "description": "Template for NGC-RAPIDS",
+      "iconClass": "icon-shadowman",
+      "openshift.io/display-name": "NGC RAPIDS",
+      "openshift.io/documentation-url": "https://ngc.nvidia.com/registry",
+      "tags": "NVIDIA,machine-learning"
+    },
+    "name": "ngc-rapids"
+  },
+  "objects": [
+    {
+      "kind": "Service",
+      "apiVersion": "v1",
+      "metadata": {
+	"name": "rapids"
+      },
+      "spec": {
+	"selector": {
+	  "app": "rapids"
+	},
+	"ports": [
+	  {
+            "name": "http",
+            "protocol": "TCP",
+            "port": 8888,
+            "targetPort": 8888
+	  },
+	  {
+            "name": "grpc",
+            "port": 8787,
+            "targetPort": 8787
+	  },
+	  {
+            "name": "prometheus",
+            "port": 8786,
+            "targetPort": 8786
+	  }
+	],
+	"sessionAffinity": "None",
+        "type": "ClusterIP"
+      }
+    },
+    {
+	"apiVersion": "route.openshift.io/v1",
+	"kind": "Route",
+	"metadata": {
+	  "name": "rapids"
+	},
+	"spec": {
+	  "host": "",
+	  "to": {
+	    "name": "rapids"
+	  },
+	  "port": {
+	    "targetPort": 8888
+	  }
+	}
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Pod",
+      "metadata": {
+	"name": "rapids",
+	"labels": {
+	  "app": "rapids"
+	}
+      },
+      "spec": {
+	"restartPolicy": "OnFailure",
+	"containers": [
+	  {
+	    "capabilities": {},
+            "name": "rapids",
+            "image": "rapidsai/rapidsai:latest",
+	    "command": ["/bin/bash", "-l", "-c"],
+	    "args": [ "/rapids/notebooks/utils/start-jupyter.sh" ],
+     	    "env": null,
+	    "ports": [
+	      {
+		"containerPort": 8888,
+		"name": "http"
+	      },
+	      {
+		"containerPort": 8787,
+		"name": "grpc"
+	      },
+	      {
+		"containerPort": 8786,
+		"name": "prometheus"
+	      }
+	    ],
+            "resources": {
+                "limits": {
+                    "nvidia.com/gpu": "${NUM_GPUS}"
+                }
+            }
+          }
+	]
+      }
+    }
+  ],
+  "parameters": [
+      {
+          "description": "Volume of User Data",
+          "displayName": "Volume of User Data",
+          "name": "MODEL_STORE",
+          "value": "/opt/ngc"
+      },
+      {
+      "description": "How many GPUs to use",
+      "displayName": "Number of GPUs",
+      "name": "NUM_GPUS",
+      "value": "1"
+    }
+  ]
+}

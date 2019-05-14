@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Route
+metadata:
+  name: rapids
+spec:
+  host: ""  
+  to:
+    kind: Service
+    name: rapids
+  port:
+    targetPort: 8888
